@@ -1,0 +1,92 @@
+# Symbol mapping — classification + price-source truth for every holding.
+#
+# This file is the robustness layer the whole pipeline leans on: Fidelity tells
+# us WHAT we hold and HOW MUCH; this file tells us what each thing IS and where
+# its price should come from when we enrich.
+#
+# Per-symbol fields:
+#   asset_class   : free-form bucket used for allocation/concentration analysis.
+#   price_source  : where the canonical "current price" comes from. One of:
+#                     yfinance     -> pull from Yahoo via yf_symbol
+#                     fidelity_csv -> trust the Last Price in the export (no public quote)
+#                     manual       -> use manual_price below (e.g. $1.00 money-market NAV)
+#   yf_symbol     : ticker to query on Yahoo (only for price_source: yfinance).
+#   yf_proxy      : OPTIONAL Yahoo ticker used ONLY for history/benchmark approximation
+#                   when the holding itself has no public quote (e.g. a 401k index trust
+#                   that tracks the S&P 500). Never used for the canonical current price.
+#   manual_price  : fixed price (only for price_source: manual).
+#
+# Keys are the CLEANED Fidelity symbol (trailing '*'/'**' stripped). CUSIP keys
+# are quoted so YAML keeps them as strings.
+
+symbols:
+  # ---- Cash / money-market (NAV pinned at $1.00) ----
+  FCASH:
+    asset_class: cash
+    price_source: manual
+    manual_price: 1.00
+  SPAXX:
+    asset_class: cash
+    price_source: manual
+    manual_price: 1.00
+  FDRXX:
+    asset_class: cash
+    price_source: manual
+    manual_price: 1.00
+
+  # ---- Public equities (Yahoo has live quotes + history) ----
+  MSFT:
+    asset_class: employer_stock      # Microsoft — also the 401k sponsor
+    price_source: yfinance
+    yf_symbol: MSFT
+  NVDA:
+    asset_class: us_equity
+    price_source: yfinance
+    yf_symbol: NVDA
+  PFLT:
+    asset_class: bdc                 # PennantPark Floating Rate — business dev. co.
+    price_source: yfinance
+    yf_symbol: PFLT
+  VST:
+    asset_class: us_equity
+    price_source: yfinance
+    yf_symbol: VST
+  GOOG:
+    asset_class: us_equity
+    price_source: yfinance
+    yf_symbol: GOOG
+  TSM:
+    asset_class: us_equity           # Taiwan Semiconductor ADR
+    price_source: yfinance
+    yf_symbol: TSM
+  OUST:
+    asset_class: us_equity           # Ouster — lidar
+    price_source: yfinance
+    yf_symbol: OUST
+
+  # ---- Proprietary 401k pools / CUSIPs (no public Yahoo quote) ----
+  "31617E471":
+    asset_class: us_equity_fund      # FID GR CO POOL CL S
+    price_source: fidelity_csv
+    yf_proxy: FDGRX                   # Fidelity Growth Company fund — history shape
+  "09261F614":
+    asset_class: target_date         # BTC LPATH IDX 2040 M (BlackRock LifePath 2040)
+    price_source: fidelity_csv
+    yf_proxy: ITDD                    # iShares LifePath Target 2040 ETF — same index
+  "59515R401":
+    asset_class: us_equity_index     # VANG 500 INDEX TRUST (tracks S&P 500)
+    price_source: fidelity_csv
+    yf_proxy: VOO                     # used only to approximate history
+
+# Default applied to any symbol not listed above, so the pipeline never crashes
+# on a new holding — it just flags it for you to classify.
+default:
+  asset_class: unclassified
+  price_source: fidelity_csv
+
+# Tickers used purely as benchmarks in analysis (not holdings).
+benchmarks:
+  - SPY
+  - QQQ
+  - VTI
+  - BND
