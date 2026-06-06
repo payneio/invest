@@ -14,13 +14,22 @@ ROOT = Path(__file__).resolve().parents[2]
 CONFIG_DIR = ROOT / "config"
 DATA_DIR = ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
-FIDELITY_DIR = RAW_DIR / "fidelity"
 PROCESSED_DIR = DATA_DIR / "processed"
+# Broker-specific paths under RAW_DIR live in invest.broker.<broker> (e.g.
+# invest.broker.robinhood.HISTORY_DIR), not here.
 
 SYMBOL_MAP_PATH = CONFIG_DIR / "symbol_map.yaml"
+# Optional account_number -> human name map (gitignored; holds account numbers).
+ACCOUNTS_MAP_PATH = CONFIG_DIR / "accounts.yaml"
+
+# Beancount ledger — the curated source of truth (gitignored; holds holdings).
+LEDGER_DIR = ROOT / "ledger"
+LEDGER_MAIN = LEDGER_DIR / "main.beancount"
+LEDGER_FIXUPS = LEDGER_DIR / "fixups.beancount"
 
 # Pipeline outputs.
 POSITIONS_PARQUET = PROCESSED_DIR / "positions.parquet"
 PRICES_PARQUET = PROCESSED_DIR / "prices.parquet"
+TRANSACTIONS_PARQUET = PROCESSED_DIR / "transactions.parquet"
 
-# Per-broker raw exports are discovered by invest.brokers (newest CSV per dir).
+# Per-source raw exports are discovered by invest.broker (newest CSV per dir).

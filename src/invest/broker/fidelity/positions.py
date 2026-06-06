@@ -18,6 +18,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from invest.schema import POSITIONS_SCHEMA
+
 # Raw header -> tidy snake_case name. Only columns we care about are renamed;
 # the rest are passed through untouched.
 _COLUMN_RENAMES = {
@@ -125,21 +127,5 @@ def load_positions(csv_path: str | Path) -> pd.DataFrame:
     # feed into the same pipeline.
     df["broker"] = "fidelity"
 
-    keep = [
-        "broker",
-        "account_number",
-        "account_name",
-        "symbol",
-        "symbol_raw",
-        "description",
-        "quantity",
-        "last_price",
-        "current_value",
-        "cost_basis",
-        "avg_cost_basis",
-        "total_gain_loss",
-        "total_gain_loss_pct",
-        "is_cash",
-    ]
-    df = df[[c for c in keep if c in df.columns]].reset_index(drop=True)
+    df = df[[c for c in POSITIONS_SCHEMA if c in df.columns]].reset_index(drop=True)
     return df

@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Fidelity Activity Exporter",
+  "version": "0.1.0",
+  "description": "Export Fidelity transaction history (all accounts, multi-year) to JSON, straight from the Activity page.",
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": ["https://digital.fidelity.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Fidelity Activity Exporter"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://digital.fidelity.com/*"],
+      "js": ["hook.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    }
+  ]
+}

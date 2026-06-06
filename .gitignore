@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 *.egg-info/
 .ipynb_checkpoints/
+.working/
 
 # uv
 # (uv.lock IS committed — it pins the resolved environment)
@@ -13,5 +14,15 @@ data/processed/*.parquet
 
 # Personal financial data — never commit raw broker exports
 data/raw/**/*.csv
+data/raw/**/*.json
+# Account-number -> name map holds real account numbers
+config/accounts.yaml
+
+# Beancount ledger — source of truth, holds holdings/account numbers.
+# (You may want to version this in a PRIVATE repo to track your fixups.)
+ledger/
+# Robinhood auth material — bearer token / cached session, never commit
+data/raw/robinhood/.rh_token
+.tokens/
 
 # Jupyter notebook execution outputs are kept, but scratch checkpoints are not

@@ -11,16 +11,16 @@ dependencies = [
     "pyyaml>=6.0",
     "yfinance>=0.2.40",
     "matplotlib>=3.8",
+    "jupyterlab>=4.0",
+    "ipykernel>=6.29",
+    "robin-stocks>=3.4.0",
+    "beancount>=3.2.3",
+    "plotly>=6.8.0",
 ]
 
 [project.scripts]
 invest-ingest = "invest.pipeline:main"
-
-[project.optional-dependencies]
-notebook = [
-    "jupyterlab>=4.0",
-    "ipykernel>=6.29",
-]
+invest-robinhood-fetch = "invest.broker.robinhood.fetch:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -31,3 +31,8 @@ packages = ["src/invest"]
 
 [tool.uv]
 package = true
+
+[dependency-groups]
+dev = [
+    "nbstripout>=0.9.1",
+]

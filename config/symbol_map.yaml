@@ -5,16 +5,22 @@
 # its price should come from when we enrich.
 #
 # Per-symbol fields:
+#   name          : OPTIONAL friendly display name — overrides the broker's terse
+#                   description in tables (handy for CUSIP-only proprietary funds).
 #   asset_class   : free-form bucket used for allocation/concentration analysis.
 #   price_source  : where the canonical "current price" comes from. One of:
 #                     yfinance     -> pull from Yahoo via yf_symbol
-#                     fidelity_csv -> trust the Last Price in the export (no public quote)
+#                     snapshot     -> use the broker snapshot's last price (no public quote)
 #                     manual       -> use manual_price below (e.g. $1.00 money-market NAV)
 #   yf_symbol     : ticker to query on Yahoo (only for price_source: yfinance).
 #   yf_proxy      : OPTIONAL Yahoo ticker used ONLY for history/benchmark approximation
 #                   when the holding itself has no public quote (e.g. a 401k index trust
 #                   that tracks the S&P 500). Never used for the canonical current price.
 #   manual_price  : fixed price (only for price_source: manual).
+#   expense_ratio : OPTIONAL annual fund fee as a fraction (0.0009 = 0.09%). Only funds
+#                   carry one; individual stocks have none. Drives the cost-leakage
+#                   analysis. Values marked "estimate" below are educated guesses for
+#                   the proprietary 401k pools — confirm against your plan documents.
 #
 # Keys are the CLEANED Fidelity symbol (trailing '*'/'**' stripped). CUSIP keys
 # are quoted so YAML keeps them as strings.
@@ -30,6 +36,10 @@ symbols:
     price_source: manual
     manual_price: 1.00
   FDRXX:
+    asset_class: cash
+    price_source: manual
+    manual_price: 1.00
+  "315994103":                         # a Fidelity money-market sweep (CUSIP), $1 NAV
     asset_class: cash
     price_source: manual
     manual_price: 1.00
@@ -66,23 +76,29 @@ symbols:
 
   # ---- Proprietary 401k pools / CUSIPs (no public Yahoo quote) ----
   "31617E471":
+    name: Fidelity Growth Company Pool
     asset_class: us_equity_fund      # FID GR CO POOL CL S
-    price_source: fidelity_csv
+    price_source: snapshot
     yf_proxy: FDGRX                   # Fidelity Growth Company fund — history shape
+    expense_ratio: 0.0043            # estimate — commingled pool, cheaper than retail FDGRX (0.79%)
   "09261F614":
-    asset_class: target_date         # BTC LPATH IDX 2040 M (BlackRock LifePath 2040)
-    price_source: fidelity_csv
+    name: BlackRock LifePath 2040
+    asset_class: target_date         # BTC LPATH IDX 2040 M
+    price_source: snapshot
     yf_proxy: ITDD                    # iShares LifePath Target 2040 ETF — same index
+    expense_ratio: 0.0009            # estimate — LifePath Index collective trust (institutional)
   "59515R401":
+    name: Vanguard 500 Index Trust
     asset_class: us_equity_index     # VANG 500 INDEX TRUST (tracks S&P 500)
-    price_source: fidelity_csv
+    price_source: snapshot
     yf_proxy: VOO                     # used only to approximate history
+    expense_ratio: 0.0001            # estimate — Vanguard Institutional 500 Index Trust
 
 # Default applied to any symbol not listed above, so the pipeline never crashes
 # on a new holding — it just flags it for you to classify.
 default:
   asset_class: unclassified
-  price_source: fidelity_csv
+  price_source: snapshot
 
 # Tickers used purely as benchmarks in analysis (not holdings).
 benchmarks:
