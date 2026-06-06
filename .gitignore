@@ -18,9 +18,11 @@ data/raw/**/*.json
 # Account-number -> name map holds real account numbers
 config/accounts.yaml
 
-# Beancount ledger — source of truth, holds holdings/account numbers.
-# (You may want to version this in a PRIVATE repo to track your fixups.)
-ledger/
+# Beancount ledger DATA — source of truth, holds holdings/account numbers.
+# Anchored to the repo root so it ignores the /ledger/ data tree only, NOT the
+# src/invest/ledger/ Python package. (You may want to version the data in a
+# PRIVATE repo to track your fixups.)
+/ledger/
 # Robinhood auth material — bearer token / cached session, never commit
 data/raw/robinhood/.rh_token
 .tokens/
